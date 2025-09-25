@@ -30,6 +30,7 @@ export interface MentionsProps {
   autoFocus?: boolean;
   maxHeight?: string | number;
   minHeight?: string | number;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 export interface ParsedMention {

@@ -7,6 +7,7 @@ export const useMentions = (triggers: MentionTriggerConfig[], maxSuggestions: nu
   const [suggestionPosition, setSuggestionPosition] = useState<MentionPosition>({ top: 0, left: 0 });
   const [currentTrigger, setCurrentTrigger] = useState<MentionTriggerConfig | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [storedRange, setStoredRange] = useState<Range | null>(null);
 
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -99,6 +100,8 @@ export const useMentions = (triggers: MentionTriggerConfig[], maxSuggestions: nu
     setCurrentTrigger,
     searchTerm,
     setSearchTerm,
+    storedRange,
+    setStoredRange,
     editorRef,
     getTriggerConfig,
     getSuggestions,

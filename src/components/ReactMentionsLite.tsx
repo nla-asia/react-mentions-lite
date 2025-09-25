@@ -15,7 +15,8 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
   disabled = false,
   autoFocus = false,
   maxHeight = '200px',
-  minHeight = '96px'
+  minHeight = '96px',
+  onKeyDown
 }) => {
   const {
     suggestions,
@@ -28,6 +29,8 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
     setCurrentTrigger,
     searchTerm,
     setSearchTerm,
+    storedRange,
+    setStoredRange,
     editorRef,
     getTriggerConfig,
     getSuggestions,
@@ -37,13 +40,20 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
   } = useMentions(triggers, maxSuggestions);
 
   const insertMention = useCallback((suggestion: any) => {
+    // Ensure the editor has focus
+    if (editorRef.current && !editorRef.current.contains(document.activeElement)) {
+      editorRef.current.focus();
+    }
+    
+    // Use stored range if available (for clicks), otherwise use current selection (for keyboard)
     const selection = window.getSelection();
-    if (!selection?.rangeCount || !currentTrigger) return;
+    const rangeToUse = storedRange || (selection?.rangeCount ? selection.getRangeAt(0) : null);
+    
+    if (!rangeToUse || !currentTrigger) return;
 
-    const range = selection.getRangeAt(0);
-    const textNode = range.startContainer;
+    const textNode = rangeToUse.startContainer;
     const textContent = textNode.textContent || '';
-    const cursorPos = range.startOffset;
+    const cursorPos = rangeToUse.startOffset;
     
     let triggerPos = cursorPos - 1;
     while (triggerPos >= 0 && textContent[triggerPos] !== currentTrigger.trigger) {
@@ -88,14 +98,17 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
       
       newRange.setStartAfter(spaceNode);
       newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
     }
 
     setSuggestions([]);
     setCurrentTrigger(null);
     setSearchTerm('');
     setSelectedIndex(0);
+    setStoredRange(null); // Clear stored range after use
     
     updateContent();
   }, [currentTrigger, setSuggestions, setCurrentTrigger, setSearchTerm, setSelectedIndex]);
@@ -123,6 +136,8 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
       
       const triggerConfig = getTriggerConfig(charBeforeCursor);
       if (triggerConfig) {
+        // Store the current range for later use when clicking suggestions
+        setStoredRange(range.cloneRange());
         setCurrentTrigger(triggerConfig);
         setSearchTerm('');
         setSelectedIndex(0);
@@ -192,8 +207,11 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
           setSearchTerm('');
           break;
       }
+    } else if (onKeyDown) {
+      // Call external onKeyDown when there are no suggestions
+      onKeyDown(e);
     }
-  }, [suggestions, selectedIndex, insertMention, setSuggestions, setCurrentTrigger, setSearchTerm, setSelectedIndex]);
+  }, [suggestions, selectedIndex, insertMention, setSuggestions, setCurrentTrigger, setSearchTerm, setSelectedIndex, onKeyDown]);
 
   const handleSuggestionSelect = useCallback((suggestion: any) => {
     insertMention(suggestion);
@@ -230,14 +248,16 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
         className="rml-editor"
       />
       
-      <SuggestionList
-        suggestions={suggestions}
-        selectedIndex={selectedIndex}
-        onSelect={handleSuggestionSelect}
-        position={suggestionPosition}
-        className={suggestionClassName}
-        style={suggestionStyle}
-      />
+      {suggestions.length > 0 && (
+        <SuggestionList
+          suggestions={suggestions}
+          selectedIndex={selectedIndex}
+          onSelect={handleSuggestionSelect}
+          position={suggestionPosition}
+          className={suggestionClassName}
+          style={suggestionStyle}
+        />
+      )}
       
       <style>{`
         .rml-editor:empty:before {
