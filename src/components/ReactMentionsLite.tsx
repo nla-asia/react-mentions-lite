@@ -18,7 +18,8 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
   maxHeight = '200px',
   minHeight = '96px',
   onKeyDown,
-  suggestionPosition = 'bottomLeft'
+  suggestionPosition = 'bottomLeft',
+  dropdownOffset
 }) => {
   const {
     suggestions,
@@ -225,6 +226,21 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
     }
   }, [autoFocus]);
 
+  const getInputRect = useCallback(() => {
+    if (editorRef.current) {
+      const rect = editorRef.current.getBoundingClientRect();
+      return {
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+        height: rect.height
+      };
+    }
+    return { top: 0, left: 0, width: 0, height: 0 };
+  }, []);
+
+  const isInputRelativePosition = suggestionPosition?.startsWith('input');
+
   const editorStyle: React.CSSProperties = {
     width: '100%',
     minHeight: minHeight,
@@ -257,8 +273,11 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
           onSelect={handleSuggestionSelect}
           position={position}
           suggestionPosition={suggestionPosition}
+          inputRect={isInputRelativePosition ? getInputRect() : undefined}
+          dropdownOffset={dropdownOffset}
           className={suggestionClassName}
           style={suggestionStyle}
+          suggestionTitle={currentTrigger?.suggestionTitle}
         />,
         document.body
       )}

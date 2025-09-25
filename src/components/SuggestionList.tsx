@@ -7,9 +7,12 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
   onSelect,
   position,
   suggestionPosition = 'bottomLeft',
+  inputRect,
+  dropdownOffset,
   className = '',
   style = {},
-  maxHeight = '160px'
+  maxHeight = '160px',
+  suggestionTitle
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const [dropdownWidth, setDropdownWidth] = useState(200); // Default min width
@@ -24,25 +27,74 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
 
   // Calculate position based on suggestionPosition
   const calculatePosition = () => {
-    const baseTop = position.top + 2;
-    const baseLeft = position.left;
+    const isInputRelative = suggestionPosition?.startsWith('input');
+    const baseRect = isInputRelative && inputRect ? inputRect : { ...position, width: 0, height: 0 };
+    
     const estimatedWidth = Math.max(dropdownWidth, 200); // Use measured width or minimum
 
     switch (suggestionPosition) {
       case 'bottomLeft':
-        return { top: baseTop, left: baseLeft };
+        return { 
+          top: position.top + 2, 
+          left: position.left 
+        };
       case 'bottomRight':
-        return { top: baseTop, left: baseLeft - estimatedWidth + 20 }; // Align right edge with caret
+        return { 
+          top: position.top + 2, 
+          left: position.left - estimatedWidth + 20 
+        };
       case 'bottomCenter':
-        return { top: baseTop, left: baseLeft - estimatedWidth / 2 + 10 }; // Center on caret
+        return { 
+          top: position.top + 2, 
+          left: position.left - estimatedWidth / 2 + 10 
+        };
       case 'topLeft':
-        return { top: baseTop - 170, left: baseLeft }; // Position above (estimate dropdown height)
+        return { 
+          top: position.top - 170, 
+          left: position.left 
+        };
       case 'topRight':
-        return { top: baseTop - 170, left: baseLeft - estimatedWidth + 20 };
+        return { 
+          top: position.top - 170, 
+          left: position.left - estimatedWidth + 20 
+        };
       case 'topCenter':
-        return { top: baseTop - 170, left: baseLeft - estimatedWidth / 2 + 10 };
+        return { 
+          top: position.top - 170, 
+          left: position.left - estimatedWidth / 2 + 10 
+        };
+      case 'inputBottomLeft':
+        return { 
+          top: baseRect.top + baseRect.height, 
+          left: baseRect.left 
+        };
+      case 'inputBottomRight':
+        return { 
+          top: baseRect.top + baseRect.height, 
+          left: baseRect.left + baseRect.width - estimatedWidth 
+        };
+      case 'inputBottomCenter':
+        return { 
+          top: baseRect.top + baseRect.height, 
+          left: baseRect.left + baseRect.width / 2 - estimatedWidth / 2 
+        };
+      case 'inputTopLeft':
+        return { 
+          top: baseRect.top - (dropdownOffset ?? 130), 
+          left: baseRect.left 
+        };
+      case 'inputTopRight':
+        return { 
+          top: baseRect.top - (dropdownOffset ?? 130), 
+          left: baseRect.left + baseRect.width - estimatedWidth 
+        };
+      case 'inputTopCenter':
+        return { 
+          top: baseRect.top - (dropdownOffset ?? 130), 
+          left: baseRect.left + baseRect.width / 2 - estimatedWidth / 2 
+        };
       default:
-        return { top: baseTop, left: baseLeft };
+        return { top: position.top + 2, left: position.left };
     }
   };
 
@@ -74,8 +126,22 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
     backgroundColor: '#eff6ff'
   };
 
+  const titleStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#6b7280',
+    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#f9fafb'
+  };
+
   return (
     <div ref={listRef} className={className} style={defaultStyle}>
+      {suggestionTitle && (
+        <div style={titleStyle}>
+          {suggestionTitle}
+        </div>
+      )}
       {suggestions.map((suggestion, index) => (
         <div
           key={suggestion.id}

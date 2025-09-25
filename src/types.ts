@@ -10,6 +10,7 @@ export interface MentionTriggerConfig {
   data: MentionItem[];
   className?: string;
   style?: React.CSSProperties;
+  suggestionTitle?: string;
 }
 
 export interface MentionPosition {
@@ -17,9 +18,18 @@ export interface MentionPosition {
   left: number;
 }
 
+export interface InputRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
 export type SuggestionPosition = 
   | 'topLeft' | 'topRight' | 'topCenter'
-  | 'bottomLeft' | 'bottomRight' | 'bottomCenter';
+  | 'bottomLeft' | 'bottomRight' | 'bottomCenter'
+  | 'inputTopLeft' | 'inputTopRight' | 'inputTopCenter'
+  | 'inputBottomLeft' | 'inputBottomRight' | 'inputBottomCenter';
 
 export interface MentionsProps {
   placeholder?: string;
@@ -36,6 +46,7 @@ export interface MentionsProps {
   minHeight?: string | number;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   suggestionPosition?: SuggestionPosition;
+  dropdownOffset?: number;
 }
 
 export interface ParsedMention {
@@ -51,7 +62,10 @@ export interface SuggestionListProps {
   onSelect: (suggestion: MentionItem) => void;
   position: MentionPosition;
   suggestionPosition?: SuggestionPosition;
+  inputRect?: InputRect;
+  dropdownOffset?: number;
   className?: string;
   style?: React.CSSProperties;
   maxHeight?: string | number;
+  suggestionTitle?: string;
 }

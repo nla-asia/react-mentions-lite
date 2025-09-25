@@ -1,7 +1,7 @@
 {
   "name": "react-mentions-lite",
-  "version": "1.1.0",
-  "description": "A lightweight, TypeScript-ready React mentions component with @ and # support, configurable positioning, and portal rendering",
+  "version": "1.2.0",
+  "description": "A lightweight, TypeScript-ready React mentions component with @ and # support, configurable positioning, portal rendering, and input-relative positioning",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",

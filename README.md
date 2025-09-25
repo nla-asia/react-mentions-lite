@@ -70,12 +70,13 @@ function App() {
 
 ## Advanced Usage
 
-### Custom Positioning
+### Input-Relative Positioning
 
 ```tsx
 <ReactMentionsLite
   triggers={triggers}
-  suggestionPosition="topRight" // Position above and aligned to right
+  suggestionPosition="inputTopLeft" // Position relative to input boundaries
+  dropdownOffset={120} // Custom offset for input-relative positioning
   onContentChange={handleContentChange}
 />
 ```
@@ -114,6 +115,7 @@ function App() {
 | `minHeight` | `string\|number` | `"96px"` | Minimum height of editor |
 | `onKeyDown` | `function` | - | Callback for keydown events |
 | `suggestionPosition` | `SuggestionPosition` | `"bottomLeft"` | Position of suggestion dropdown |
+| `dropdownOffset` | `number` | - | Offset for input-relative positioning (px) |
 
 ### SuggestionPosition Options
 
@@ -123,6 +125,12 @@ function App() {
 - `"topLeft"` - Position above caret, aligned to left
 - `"topRight"` - Position above caret, aligned to right
 - `"topCenter"` - Position above caret, centered horizontally
+- `"inputTopLeft"` - Position above input, aligned to left
+- `"inputTopRight"` - Position above input, aligned to right
+- `"inputTopCenter"` - Position above input, centered horizontally
+- `"inputBottomLeft"` - Position below input, aligned to left
+- `"inputBottomRight"` - Position below input, aligned to right
+- `"inputBottomCenter"` - Position below input, centered horizontally
 
 ### Types
 
@@ -143,7 +151,9 @@ interface MentionTriggerConfig {
 
 type SuggestionPosition = 
   | 'topLeft' | 'topRight' | 'topCenter'
-  | 'bottomLeft' | 'bottomRight' | 'bottomCenter';
+  | 'bottomLeft' | 'bottomRight' | 'bottomCenter'
+  | 'inputTopLeft' | 'inputTopRight' | 'inputTopCenter'
+  | 'inputBottomLeft' | 'inputBottomRight' | 'inputBottomCenter';
 ```
 
 ## License
