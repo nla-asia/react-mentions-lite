@@ -24,11 +24,11 @@
     "contenteditable",
     "autocomplete"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Nika <nika@autopilotbrowser.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/react-mentions-lite.git"
+    "url": "https://github.com/nla-asia/react-mentions-lite.git"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
