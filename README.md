@@ -1,6 +1,6 @@
 # React Mentions Lite
 
-A lightweight, TypeScript-ready React mentions component with support for @ mentions and # hashtags.
+A lightweight, TypeScript-ready React mentions component with support for @ mentions and # hashtags. Features trigger-specific titles, input-relative positioning, and imperative input control.
 
 ## Features
 
@@ -14,6 +14,9 @@ A lightweight, TypeScript-ready React mentions component with support for @ ment
 - 📍 Configurable suggestion dropdown positioning
 - 🖱️ Click support for suggestions
 - 🔒 Portal rendering to avoid overflow clipping
+- 🎯 Trigger-specific suggestion titles
+- 🎛️ Input-relative positioning with offset control
+- 🧹 Imperative input clearing via ref
 
 ## Installation
 
@@ -42,11 +45,13 @@ const tags = [
 const triggers: MentionTriggerConfig[] = [
   {
     trigger: '@',
-    data: users
+    data: users,
+    suggestionTitle: 'Users'
   },
   {
     trigger: '#',
-    data: tags
+    data: tags,
+    suggestionTitle: 'Tags'
   }
 ];
 
@@ -73,6 +78,19 @@ function App() {
 ### Input-Relative Positioning
 
 ```tsx
+const triggers: MentionTriggerConfig[] = [
+  {
+    trigger: '@',
+    data: users,
+    suggestionTitle: 'Select a user'
+  },
+  {
+    trigger: '#',
+    data: channels,
+    suggestionTitle: 'Choose a channel'
+  }
+];
+
 <ReactMentionsLite
   triggers={triggers}
   suggestionPosition="inputTopLeft" // Position relative to input boundaries
@@ -97,6 +115,32 @@ function App() {
 />
 ```
 
+### Programmatic Input Clearing
+
+```tsx
+import React, { useRef } from 'react';
+import { ReactMentionsLite, MentionsRef } from 'react-mentions-lite';
+
+function ChatInput() {
+  const mentionsRef = useRef<MentionsRef>(null);
+
+  const handleSendMessage = async () => {
+    // Send message logic...
+    
+    // Clear the input after successful send
+    mentionsRef.current?.clear();
+  };
+
+  return (
+    <ReactMentionsLite
+      ref={mentionsRef}
+      triggers={triggers}
+      onContentChange={handleContentChange}
+    />
+  );
+}
+```
+
 ## API Reference
 
 ### Props
@@ -116,6 +160,7 @@ function App() {
 | `onKeyDown` | `function` | - | Callback for keydown events |
 | `suggestionPosition` | `SuggestionPosition` | `"bottomLeft"` | Position of suggestion dropdown |
 | `dropdownOffset` | `number` | - | Offset for input-relative positioning (px) |
+| `ref` | `React.Ref<MentionsRef>` | - | Ref for imperative methods |
 
 ### SuggestionPosition Options
 
@@ -147,6 +192,11 @@ interface MentionTriggerConfig {
   data: MentionItem[];
   className?: string;
   style?: React.CSSProperties;
+  suggestionTitle?: string; // Title shown above suggestions for this trigger
+}
+
+interface MentionsRef {
+  clear: () => void; // Clear the input content
 }
 
 type SuggestionPosition = 
