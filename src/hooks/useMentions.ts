@@ -28,15 +28,15 @@ export const useMentions = (triggers: MentionTriggerConfig[], maxSuggestions: nu
 
   const getCaretPosition = useCallback((): MentionPosition | null => {
     const selection = window.getSelection();
-    if (!selection?.rangeCount || !editorRef.current) return null;
+    if (!selection?.rangeCount) return null;
     
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
-    const editorRect = editorRef.current.getBoundingClientRect();
     
+    // Return viewport coordinates for portal rendering
     return {
-      top: rect.bottom - editorRect.top,
-      left: rect.left - editorRect.left
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX
     };
   }, []);
 

@@ -17,6 +17,10 @@ export interface MentionPosition {
   left: number;
 }
 
+export type SuggestionPosition = 
+  | 'topLeft' | 'topRight' | 'topCenter'
+  | 'bottomLeft' | 'bottomRight' | 'bottomCenter';
+
 export interface MentionsProps {
   placeholder?: string;
   className?: string;
@@ -31,6 +35,7 @@ export interface MentionsProps {
   maxHeight?: string | number;
   minHeight?: string | number;
   onKeyDown?: (e: React.KeyboardEvent) => void;
+  suggestionPosition?: SuggestionPosition;
 }
 
 export interface ParsedMention {
@@ -45,6 +50,7 @@ export interface SuggestionListProps {
   selectedIndex: number;
   onSelect: (suggestion: MentionItem) => void;
   position: MentionPosition;
+  suggestionPosition?: SuggestionPosition;
   className?: string;
   style?: React.CSSProperties;
   maxHeight?: string | number;

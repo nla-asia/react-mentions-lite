@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { MentionsProps } from '../types';
 import { useMentions } from '../hooks/useMentions';
 import SuggestionList from './SuggestionList';
@@ -16,14 +17,15 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
   autoFocus = false,
   maxHeight = '200px',
   minHeight = '96px',
-  onKeyDown
+  onKeyDown,
+  suggestionPosition = 'bottomLeft'
 }) => {
   const {
     suggestions,
     setSuggestions,
     selectedIndex,
     setSelectedIndex,
-    suggestionPosition,
+    suggestionPosition: position,
     setSuggestionPosition,
     currentTrigger,
     setCurrentTrigger,
@@ -44,30 +46,30 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
     if (editorRef.current && !editorRef.current.contains(document.activeElement)) {
       editorRef.current.focus();
     }
-    
+
     // Use stored range if available (for clicks), otherwise use current selection (for keyboard)
     const selection = window.getSelection();
     const rangeToUse = storedRange || (selection?.rangeCount ? selection.getRangeAt(0) : null);
-    
+
     if (!rangeToUse || !currentTrigger) return;
 
     const textNode = rangeToUse.startContainer;
     const textContent = textNode.textContent || '';
     const cursorPos = rangeToUse.startOffset;
-    
+
     let triggerPos = cursorPos - 1;
     while (triggerPos >= 0 && textContent[triggerPos] !== currentTrigger.trigger) {
       triggerPos--;
     }
-    
+
     if (triggerPos >= 0) {
       const newRange = document.createRange();
       newRange.setStart(textNode, triggerPos);
       newRange.setEnd(textNode, cursorPos);
-      
+
       const mentionElement = document.createElement('span');
       const triggerConfig = currentTrigger;
-      
+
       // Apply custom styles
       Object.assign(mentionElement.style, {
         display: 'inline-block',
@@ -78,24 +80,24 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
         color: triggerConfig.trigger === '@' ? '#1e40af' : '#166534',
         ...triggerConfig.style
       });
-      
+
       if (triggerConfig.className) {
         mentionElement.className = triggerConfig.className;
       }
-      
+
       mentionElement.contentEditable = 'false';
       mentionElement.setAttribute('data-mention-type', triggerConfig.trigger);
       mentionElement.setAttribute('data-mention-value', suggestion.value);
       mentionElement.setAttribute('data-mention-display', suggestion.display);
       mentionElement.textContent = `${triggerConfig.trigger}${suggestion.display}`;
-      
+
       newRange.deleteContents();
       newRange.insertNode(mentionElement);
-      
+
       const spaceNode = document.createTextNode(' ');
       newRange.setStartAfter(mentionElement);
       newRange.insertNode(spaceNode);
-      
+
       newRange.setStartAfter(spaceNode);
       newRange.collapse(true);
       if (selection) {
@@ -109,7 +111,7 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
     setSearchTerm('');
     setSelectedIndex(0);
     setStoredRange(null); // Clear stored range after use
-    
+
     updateContent();
   }, [currentTrigger, setSuggestions, setCurrentTrigger, setSearchTerm, setSelectedIndex]);
 
@@ -133,7 +135,7 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
     if (textNode.nodeType === Node.TEXT_NODE) {
       const textContent = textNode.textContent || '';
       const charBeforeCursor = textContent[cursorPos - 1];
-      
+
       const triggerConfig = getTriggerConfig(charBeforeCursor);
       if (triggerConfig) {
         // Store the current range for later use when clicking suggestions
@@ -141,26 +143,26 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
         setCurrentTrigger(triggerConfig);
         setSearchTerm('');
         setSelectedIndex(0);
-        
+
         const position = getCaretPosition();
         if (position) {
           setSuggestionPosition(position);
         }
-        
+
         const suggestions = getSuggestions(triggerConfig, '');
         setSuggestions(suggestions);
         return;
       }
-      
+
       if (currentTrigger) {
         let triggerPos = cursorPos - 1;
         while (triggerPos >= 0 && textContent[triggerPos] !== currentTrigger.trigger) {
           triggerPos--;
         }
-        
+
         if (triggerPos >= 0) {
           const newSearchTerm = textContent.slice(triggerPos + 1, cursorPos);
-          
+
           if (newSearchTerm.includes(' ') || newSearchTerm.includes('\n')) {
             setSuggestions([]);
             setCurrentTrigger(null);
@@ -178,9 +180,9 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
         }
       }
     }
-    
+
     updateContent();
-  }, [currentTrigger, getTriggerConfig, getSuggestions, getCaretPosition, updateContent, 
+  }, [currentTrigger, getTriggerConfig, getSuggestions, getCaretPosition, updateContent,
       setCurrentTrigger, setSearchTerm, setSelectedIndex, setSuggestions, setSuggestionPosition]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -247,18 +249,20 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
         suppressContentEditableWarning={true}
         className="rml-editor"
       />
-      
-      {suggestions.length > 0 && (
+
+      {suggestions.length > 0 && ReactDOM.createPortal(
         <SuggestionList
           suggestions={suggestions}
           selectedIndex={selectedIndex}
           onSelect={handleSuggestionSelect}
-          position={suggestionPosition}
+          position={position}
+          suggestionPosition={suggestionPosition}
           className={suggestionClassName}
           style={suggestionStyle}
-        />
+        />,
+        document.body
       )}
-      
+
       <style>{`
         .rml-editor:empty:before {
           content: attr(data-placeholder);

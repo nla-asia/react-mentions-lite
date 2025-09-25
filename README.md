@@ -11,6 +11,9 @@ A lightweight, TypeScript-ready React mentions component with support for @ ment
 - 🔧 Configurable triggers (@ and # by default)
 - 📱 Mobile friendly
 - 🎯 Zero dependencies (except React)
+- 📍 Configurable suggestion dropdown positioning
+- 🖱️ Click support for suggestions
+- 🔒 Portal rendering to avoid overflow clipping
 
 ## Installation
 
@@ -59,9 +62,38 @@ function App() {
       placeholder="Type @ or # to mention..."
       triggers={triggers}
       onContentChange={handleContentChange}
+      suggestionPosition="bottomCenter"
     />
   );
 }
+```
+
+## Advanced Usage
+
+### Custom Positioning
+
+```tsx
+<ReactMentionsLite
+  triggers={triggers}
+  suggestionPosition="topRight" // Position above and aligned to right
+  onContentChange={handleContentChange}
+/>
+```
+
+### External KeyDown Handling
+
+```tsx
+<ReactMentionsLite
+  triggers={triggers}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      // Handle form submission
+      handleSubmit();
+    }
+  }}
+  onContentChange={handleContentChange}
+/>
 ```
 
 ## API Reference
@@ -80,6 +112,17 @@ function App() {
 | `autoFocus` | `boolean` | `false` | Auto focus on mount |
 | `maxHeight` | `string\|number` | `"200px"` | Maximum height of editor |
 | `minHeight` | `string\|number` | `"96px"` | Minimum height of editor |
+| `onKeyDown` | `function` | - | Callback for keydown events |
+| `suggestionPosition` | `SuggestionPosition` | `"bottomLeft"` | Position of suggestion dropdown |
+
+### SuggestionPosition Options
+
+- `"bottomLeft"` - Position below caret, aligned to left
+- `"bottomRight"` - Position below caret, aligned to right  
+- `"bottomCenter"` - Position below caret, centered horizontally
+- `"topLeft"` - Position above caret, aligned to left
+- `"topRight"` - Position above caret, aligned to right
+- `"topCenter"` - Position above caret, centered horizontally
 
 ### Types
 
@@ -97,6 +140,10 @@ interface MentionTriggerConfig {
   className?: string;
   style?: React.CSSProperties;
 }
+
+type SuggestionPosition = 
+  | 'topLeft' | 'topRight' | 'topCenter'
+  | 'bottomLeft' | 'bottomRight' | 'bottomCenter';
 ```
 
 ## License

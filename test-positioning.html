@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Mentions Lite Positioning Test</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .position-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>React Mentions Lite Positioning Test</h1>
+
+    <div class="test-container">
+        <div class="position-label">Bottom Left (default)</div>
+        <div id="bottom-left"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="position-label">Bottom Right</div>
+        <div id="bottom-right"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="position-label">Bottom Center</div>
+        <div id="bottom-center"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="position-label">Top Left</div>
+        <div id="top-left"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="position-label">Top Right</div>
+        <div id="top-right"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="position-label">Top Center</div>
+        <div id="top-center"></div>
+    </div>
+
+    <script type="text/babel">
+        // Mock data
+        const users = [
+            { id: 1, display: 'John Doe', value: 'johndoe' },
+            { id: 2, display: 'Jane Smith', value: 'janesmith' },
+            { id: 3, display: 'Bob Johnson', value: 'bobjohnson' }
+        ];
+
+        const triggers = [{
+            trigger: '@',
+            data: users
+        }];
+
+        // Test components
+        function TestComponent({ position, containerId }) {
+            const [content, setContent] = React.useState('');
+            const [plainText, setPlainText] = React.useState('');
+            const [mentions, setMentions] = React.useState([]);
+
+            const handleContentChange = (htmlContent, textContent, parsedMentions) => {
+                setContent(htmlContent);
+                setPlainText(textContent);
+                setMentions(parsedMentions);
+            };
+
+            return React.createElement('div', null,
+                React.createElement(window.ReactMentionsLite, {
+                    placeholder: `Type @ to test ${position} positioning`,
+                    triggers: triggers,
+                    onContentChange: handleContentChange,
+                    suggestionPosition: position,
+                    style: { minHeight: '60px' }
+                }),
+                React.createElement('div', { style: { marginTop: '10px', fontSize: '12px', color: '#666' } },
+                    `Mentions: ${mentions.length}`
+                )
+            );
+        }
+
+        // Load the built package
+        const script = document.createElement('script');
+        script.src = './dist/index.js';
+        script.onload = () => {
+            // Render test components
+            const positions = ['bottomLeft', 'bottomRight', 'bottomCenter', 'topLeft', 'topRight', 'topCenter'];
+            positions.forEach(pos => {
+                const container = document.getElementById(pos.replace(/([A-Z])/g, '-$1').toLowerCase());
+                if (container) {
+                    ReactDOM.render(
+                        React.createElement(TestComponent, { position: pos, containerId: pos }),
+                        container
+                    );
+                }
+            });
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
