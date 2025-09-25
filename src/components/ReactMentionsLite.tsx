@@ -1,10 +1,14 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, forwardRef } from 'react';
 import ReactDOM from 'react-dom';
 import { MentionsProps } from '../types';
 import { useMentions } from '../hooks/useMentions';
 import SuggestionList from './SuggestionList';
 
-const ReactMentionsLite: React.FC<MentionsProps> = ({
+export interface MentionsRef {
+  clear: () => void;
+}
+
+const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
   placeholder = "Type to mention...",
   className = '',
   style = {},
@@ -20,7 +24,7 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
   onKeyDown,
   suggestionPosition = 'bottomLeft',
   dropdownOffset
-}) => {
+}, ref) => {
   const {
     suggestions,
     setSuggestions,
@@ -41,6 +45,22 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
     parseMentions,
     getPlainText
   } = useMentions(triggers, maxSuggestions);
+
+  // Expose clear method to parent component
+  useImperativeHandle(ref, () => ({
+    clear: () => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = '';
+        // Also clear any stored state
+        setSuggestions([]);
+        setCurrentTrigger(null);
+        setSearchTerm('');
+        setSelectedIndex(0);
+        // Trigger onContentChange with empty content
+        onContentChange?.('', '', []);
+      }
+    }
+  }), [onContentChange]);
 
   const insertMention = useCallback((suggestion: any) => {
     // Ensure the editor has focus
@@ -294,6 +314,6 @@ const ReactMentionsLite: React.FC<MentionsProps> = ({
       `}</style>
     </div>
   );
-};
+});
 
 export default ReactMentionsLite;

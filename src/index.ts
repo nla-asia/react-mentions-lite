@@ -10,3 +10,4 @@ export type {
   ParsedMention,
   SuggestionListProps
 } from './types';
+export type { MentionsRef } from './components/ReactMentionsLite';

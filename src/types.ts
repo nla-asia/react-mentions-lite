@@ -47,6 +47,7 @@ export interface MentionsProps {
   onKeyDown?: (e: React.KeyboardEvent) => void;
   suggestionPosition?: SuggestionPosition;
   dropdownOffset?: number;
+  clearInput?: () => void;
 }
 
 export interface ParsedMention {
