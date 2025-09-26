@@ -110,6 +110,7 @@ const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
       mentionElement.setAttribute('data-mention-type', triggerConfig.trigger);
       mentionElement.setAttribute('data-mention-value', suggestion.value);
       mentionElement.setAttribute('data-mention-display', suggestion.display);
+      mentionElement.setAttribute('data-mention-id', suggestion.id.toString());
       mentionElement.textContent = `${triggerConfig.trigger}${suggestion.display}`;
 
       newRange.deleteContents();

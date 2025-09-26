@@ -55,6 +55,7 @@ export interface ParsedMention {
   value: string;
   display: string;
   index: number;
+  id: string;
 }
 
 export interface SuggestionListProps {

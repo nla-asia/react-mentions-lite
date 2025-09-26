@@ -50,12 +50,14 @@ export const useMentions = (triggers: MentionTriggerConfig[], maxSuggestions: nu
       const type = element.getAttribute('data-mention-type') || '';
       const value = element.getAttribute('data-mention-value') || '';
       const display = element.getAttribute('data-mention-display') || '';
+      const id = element.getAttribute('data-mention-id') || '';
       
       mentions.push({
         type,
         value,
         display,
-        index
+        index,
+        id
       });
     });
     
@@ -66,27 +68,27 @@ export const useMentions = (triggers: MentionTriggerConfig[], maxSuggestions: nu
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     
-    let text = '';
-    const walker = document.createTreeWalker(
-      doc.body,
-      NodeFilter.SHOW_ALL
-    );
-    
-    let node;
-    while (node = walker.nextNode()) {
+    const extractText = (node: Node): string => {
       if (node.nodeType === Node.TEXT_NODE) {
-        text += node.textContent;
+        return node.textContent || '';
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node as Element;
         if (element.hasAttribute('data-mention-type')) {
-          const type = element.getAttribute('data-mention-type');
-          const value = element.getAttribute('data-mention-value');
-          text += `${type}${value}`;
+          const type = element.getAttribute('data-mention-type') || '';
+          const value = element.getAttribute('data-mention-value') || '';
+          return `${type}${value}`;
+        } else {
+          let text = '';
+          for (const child of element.childNodes) {
+            text += extractText(child);
+          }
+          return text;
         }
       }
-    }
+      return '';
+    };
     
-    return text;
+    return extractText(doc.body);
   }, []);
 
   return {
