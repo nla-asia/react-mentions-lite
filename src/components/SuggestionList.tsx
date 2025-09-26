@@ -132,7 +132,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
     padding: '8px 12px',
     cursor: 'pointer',
     border: 'none',
-    background: 'transparent',
+    backgroundColor: 'transparent',
     width: '100%',
     textAlign: 'left',
     fontSize: 'inherit',
