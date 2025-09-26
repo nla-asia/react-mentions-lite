@@ -1,22 +1,24 @@
 # React Mentions Lite
 
-A lightweight, TypeScript-ready React mentions component with support for @ mentions and # hashtags. Features trigger-specific titles, input-relative positioning, and imperative input control.
+A lightweight, TypeScript-ready React mentions component with support for @ mentions and # hashtags. Features trigger-specific titles, input-relative positioning, external height constraints, and imperative input control.
 
 ## Features
 
 - 🚀 Lightweight and performant
 - 📝 TypeScript ready with full type definitions
 - ⌨️ Keyboard navigation (Arrow keys, Tab, Enter, Escape)
-- 🎨 Customizable styling
+- 🖱️ Click support for all suggestion items
+- 🎨 Customizable styling with external height constraints
 - 🔧 Configurable triggers (@ and # by default)
 - 📱 Mobile friendly
 - 🎯 Zero dependencies (except React)
 - 📍 Configurable suggestion dropdown positioning
-- 🖱️ Click support for suggestions
-- 🔒 Portal rendering to avoid overflow clipping
-- 🎯 Trigger-specific suggestion titles
+-  Portal rendering to avoid overflow clipping
+- 🎯 Trigger-specific suggestion titles with natural stacking
 - 🎛️ Input-relative positioning with offset control
 - 🧹 Imperative input clearing via ref
+- 🎯 Smart suggestion hiding when no matches found
+- ♿ Full accessibility support with Tab navigation
 
 ## Installation
 
@@ -99,21 +101,20 @@ const triggers: MentionTriggerConfig[] = [
 />
 ```
 
-### External KeyDown Handling
+### External Height Constraints
 
 ```tsx
 <ReactMentionsLite
   triggers={triggers}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      // Handle form submission
-      handleSubmit();
-    }
+  suggestionStyle={{
+    minHeight: '100px',
+    maxHeight: '200px'
   }}
   onContentChange={handleContentChange}
 />
 ```
+
+Apply external height constraints to the suggestion dropdown using the `suggestionStyle` prop. The dropdown will respect these constraints while maintaining proper scrolling and title positioning.
 
 ### Programmatic Input Clearing
 
@@ -153,6 +154,8 @@ function ChatInput() {
 | `style` | `CSSProperties` | `{}` | Inline styles for container |
 | `onContentChange` | `function` | - | Callback when content changes |
 | `maxSuggestions` | `number` | `10` | Maximum suggestions to show |
+| `suggestionStyle` | `CSSProperties` | `{}` | Inline styles for suggestion dropdown |
+| `suggestionClassName` | `string` | `""` | CSS class for suggestion dropdown |
 | `disabled` | `boolean` | `false` | Disable the input |
 | `autoFocus` | `boolean` | `false` | Auto focus on mount |
 | `maxHeight` | `string\|number` | `"200px"` | Maximum height of editor |

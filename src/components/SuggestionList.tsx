@@ -12,16 +12,23 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
   className = '',
   style = {},
   maxHeight = '160px',
+  minHeight = '0px',
   suggestionTitle
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const [dropdownWidth, setDropdownWidth] = useState(200); // Default min width
 
   useEffect(() => {
-    if (listRef.current) {
-      setDropdownWidth(listRef.current.offsetWidth);
+    if (listRef.current && selectedIndex >= 0) {
+      const selectedElement = listRef.current.children[selectedIndex + (suggestionTitle ? 1 : 0)] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest' 
+        });
+      }
     }
-  }, [suggestions]);
+  }, [selectedIndex, suggestionTitle]);
 
   if (!suggestions.length) return null;
 
@@ -100,17 +107,23 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
 
   const calculatedPosition = calculatePosition();
 
-  const defaultStyle: React.CSSProperties = {
-    position: 'fixed', // Changed from absolute to fixed for portal rendering
+  // Extract maxHeight and minHeight from style props or use defaults
+  const effectiveMaxHeight = (style?.maxHeight as string) || maxHeight;
+  const effectiveMinHeight = (style?.minHeight as string) || minHeight;
+
+  const wrapperStyle: React.CSSProperties = {
+    position: 'fixed',
     top: calculatedPosition.top,
     left: calculatedPosition.left,
+    zIndex: 9999,
+    padding: '8px' // Add padding around the dropdown for better visual spacing
+  };
+
+  const listStyle: React.CSSProperties = {
     backgroundColor: 'white',
     border: '1px solid #d1d5db',
     borderRadius: '6px',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    maxHeight: maxHeight,
-    overflowY: 'auto',
-    zIndex: 9999,
     minWidth: '200px',
     ...style
   };
@@ -118,12 +131,18 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
   const itemStyle: React.CSSProperties = {
     padding: '8px 12px',
     cursor: 'pointer',
-    borderBottom: '1px solid #f3f4f6'
+    border: 'none',
+    background: 'transparent',
+    width: '100%',
+    textAlign: 'left',
+    fontSize: 'inherit',
+    fontFamily: 'inherit'
   };
 
   const selectedItemStyle: React.CSSProperties = {
     ...itemStyle,
-    backgroundColor: '#eff6ff'
+    backgroundColor: '#3b82f6',
+    color: 'white'
   };
 
   const titleStyle: React.CSSProperties = {
@@ -136,35 +155,52 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
   };
 
   return (
-    <div ref={listRef} className={className} style={defaultStyle}>
+    <div style={wrapperStyle}>
       {suggestionTitle && (
-        <div style={titleStyle}>
+        <div style={{
+          ...titleStyle,
+          position: 'relative',
+          backgroundColor: 'white',
+          borderBottom: '1px solid #e5e7eb'
+        }}>
           {suggestionTitle}
         </div>
       )}
-      {suggestions.map((suggestion, index) => (
-        <div
-          key={suggestion.id}
-          style={index === selectedIndex ? selectedItemStyle : itemStyle}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onSelect(suggestion);
-          }}
-          onMouseEnter={(e) => {
-            if (index !== selectedIndex) {
-              e.currentTarget.style.backgroundColor = '#f9fafb';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (index !== selectedIndex) {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }
-          }}
-        >
-          {suggestion.display}
-        </div>
-      ))}
+      <div 
+        ref={listRef} 
+        className={className} 
+        style={{
+          ...listStyle,
+          maxHeight: suggestionTitle ? `calc(${effectiveMaxHeight} - 40px)` : effectiveMaxHeight,
+          minHeight: suggestionTitle ? `calc(${effectiveMinHeight} - 40px)` : effectiveMinHeight,
+          overflowY: 'auto'
+        }}
+      >
+        {suggestions.map((suggestion, index) => (
+          <button
+            key={suggestion.id}
+            type="button"
+            style={index === selectedIndex ? selectedItemStyle : itemStyle}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onSelect(suggestion);
+            }}
+            onMouseEnter={(e) => {
+              if (index !== selectedIndex) {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (index !== selectedIndex) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
+          >
+            {suggestion.display}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

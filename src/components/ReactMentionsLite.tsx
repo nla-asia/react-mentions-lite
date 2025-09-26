@@ -190,6 +190,7 @@ const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
             setSearchTerm('');
           } else {
             setSearchTerm(newSearchTerm);
+            setStoredRange(range.cloneRange());
             const newSuggestions = getSuggestions(currentTrigger, newSearchTerm);
             setSuggestions(newSuggestions);
             setSelectedIndex(0);
@@ -218,7 +219,12 @@ const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
           setSelectedIndex(prev => prev === 0 ? suggestions.length - 1 : prev - 1);
           break;
         case 'Tab':
+          // Option 1: Tab cycles through suggestions 
+          e.preventDefault();
+          setSelectedIndex(prev => (prev + 1) % suggestions.length);
+          break;
         case 'Enter':
+          // Enter selects the current suggestion
           e.preventDefault();
           if (suggestions[selectedIndex]) {
             insertMention(suggestions[selectedIndex]);
@@ -239,6 +245,16 @@ const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
   const handleSuggestionSelect = useCallback((suggestion: any) => {
     insertMention(suggestion);
   }, [insertMention]);
+
+  const handleBlur = useCallback(() => {
+    // Delay hiding suggestions to allow click events on suggestion buttons to be processed first
+    setTimeout(() => {
+      setSuggestions([]);
+      setCurrentTrigger(null);
+      setSearchTerm('');
+      setSelectedIndex(0);
+    }, 150);
+  }, [setSuggestions, setCurrentTrigger, setSearchTerm, setSelectedIndex]);
 
   useEffect(() => {
     if (autoFocus && editorRef.current) {
@@ -281,6 +297,7 @@ const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
         contentEditable={!disabled}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
         data-placeholder={placeholder}
         suppressContentEditableWarning={true}
         className="rml-editor"
@@ -297,6 +314,8 @@ const ReactMentionsLite = forwardRef<MentionsRef, MentionsProps>(({
           dropdownOffset={dropdownOffset}
           className={suggestionClassName}
           style={suggestionStyle}
+          maxHeight={maxHeight}
+          minHeight={minHeight}
           suggestionTitle={currentTrigger?.suggestionTitle}
         />,
         document.body

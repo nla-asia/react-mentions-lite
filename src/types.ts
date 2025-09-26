@@ -68,5 +68,6 @@ export interface SuggestionListProps {
   className?: string;
   style?: React.CSSProperties;
   maxHeight?: string | number;
+  minHeight?: string | number;
   suggestionTitle?: string;
 }
